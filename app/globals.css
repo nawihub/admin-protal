@@ -1,0 +1,622 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (driven by next-themes toggling `.dark` on <html>),
+   not the OS `prefers-color-scheme` media query default Tailwind v4 ships with. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   NaWeHub Design System
+   Tokens mirrored verbatim from nawehub-web
+   (app/globals.css + tailwind.config.ts) - do not invent new
+   brand colors here, only port the existing ramp.
+   ============================================================ */
+
+:root {
+  /* Primary - Forest Green (Growth & Prosperity) */
+  --color-primary-50: 152 81% 96%;
+  --color-primary-100: 149 80% 90%;
+  --color-primary-200: 152 76% 80%;
+  --color-primary-300: 156 72% 67%;
+  --color-primary-400: 160 64% 52%;
+  --color-primary-500: 160 84% 39%;
+  --color-primary-600: 161 94% 30%;
+  --color-primary-700: 163 94% 24%;
+  --color-primary-800: 164 86% 20%;
+  --color-primary-900: 166 91% 15%;
+
+  /* Secondary - Sunset Orange (Energy & Community) */
+  --color-secondary-50: 33 100% 96%;
+  --color-secondary-100: 34 100% 92%;
+  --color-secondary-200: 32 98% 83%;
+  --color-secondary-300: 31 97% 72%;
+  --color-secondary-400: 27 96% 61%;
+  --color-secondary-500: 25 95% 53%;
+  --color-secondary-600: 21 90% 48%;
+  --color-secondary-700: 17 88% 40%;
+  --color-secondary-800: 15 79% 34%;
+  --color-secondary-900: 15 75% 28%;
+
+  /* Neutral - Warm Gray (Approachable, Not Cold) */
+  --color-neutral-50: 60 9% 98%;
+  --color-neutral-100: 60 5% 96%;
+  --color-neutral-200: 20 6% 90%;
+  --color-neutral-300: 24 6% 83%;
+  --color-neutral-400: 24 5% 64%;
+  --color-neutral-500: 25 5% 45%;
+  --color-neutral-600: 33 5% 32%;
+  --color-neutral-700: 30 6% 25%;
+  --color-neutral-800: 12 6% 15%;
+  --color-neutral-900: 24 10% 10%;
+
+  /* Semantic state colors */
+  --color-success: 142 71% 45%;
+  --color-warning: 38 92% 50%;
+  --color-error: 0 84% 60%;
+  --color-info: 217 91% 60%;
+
+  /* Surface roles (light mode) */
+  --background: 60 9% 98%;
+  --foreground: 24 10% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 24 10% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 24 10% 10%;
+  --primary: 160 84% 39%;
+  --primary-foreground: 60 9% 98%;
+  --secondary: 60 5% 96%;
+  --secondary-foreground: 24 10% 10%;
+  --muted: 60 5% 96%;
+  --muted-foreground: 25 5% 45%;
+  --accent: 25 95% 53%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 60 9% 98%;
+  --border: 20 6% 90%;
+  --input: 20 6% 90%;
+  --ring: 160 84% 39%;
+
+  /* Radius scale */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadow scale */
+  --shadow-color-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-color-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-color-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-color-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-primary: 0 4px 14px 0 rgb(16 185 129 / 0.39);
+  --shadow-secondary: 0 4px 14px 0 rgb(249 115 22 / 0.39);
+
+  /* Spacing scale (4px base unit) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Line heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Duration scale */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+
+  /* Easings */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Chart colors */
+  --chart-1: 160 84% 39%;
+  --chart-2: 25 95% 53%;
+  --chart-3: 217 91% 60%;
+  --chart-4: 142 71% 45%;
+  --chart-5: 38 92% 50%;
+}
+
+:root[data-theme="dark"],
+.dark {
+  --background: 24 10% 10%;
+  --foreground: 30 15% 95%;
+  --card: 24 10% 12%;
+  --card-foreground: 30 15% 95%;
+  --popover: 24 10% 12%;
+  --popover-foreground: 30 15% 95%;
+  --primary: 160 84% 39%;
+  --primary-foreground: 24 10% 10%;
+  --secondary: 24 10% 18%;
+  --secondary-foreground: 30 15% 95%;
+  --muted: 24 10% 18%;
+  --muted-foreground: 30 15% 65%;
+  --accent: 28 85% 55%;
+  --accent-foreground: 24 10% 10%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 30 15% 95%;
+  --border: 24 10% 20%;
+  --input: 24 10% 20%;
+  --ring: 160 84% 39%;
+
+  --shadow-color-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-color-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-color-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-color-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --shadow-primary: 0 4px 14px 0 rgb(16 185 129 / 0.25);
+  --shadow-secondary: 0 4px 14px 0 rgb(249 115 22 / 0.25);
+
+  --chart-1: 160 70% 45%;
+  --chart-2: 28 85% 55%;
+  --chart-3: 217 80% 65%;
+  --chart-4: 142 60% 50%;
+  --chart-5: 38 80% 55%;
+}
+
+/* ============================================================
+   Tailwind v4 theme wiring: expose the HSL-triplet CSS vars
+   above as real utility tokens (bg-primary-500, text-foreground,
+   rounded-xl, shadow-lg, duration-normal, font-display, ...)
+   ============================================================ */
+@theme inline {
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --color-primary-50: hsl(var(--color-primary-50));
+  --color-primary-100: hsl(var(--color-primary-100));
+  --color-primary-200: hsl(var(--color-primary-200));
+  --color-primary-300: hsl(var(--color-primary-300));
+  --color-primary-400: hsl(var(--color-primary-400));
+  --color-primary-500: hsl(var(--color-primary-500));
+  --color-primary-600: hsl(var(--color-primary-600));
+  --color-primary-700: hsl(var(--color-primary-700));
+  --color-primary-800: hsl(var(--color-primary-800));
+  --color-primary-900: hsl(var(--color-primary-900));
+
+  --color-secondary-50: hsl(var(--color-secondary-50));
+  --color-secondary-100: hsl(var(--color-secondary-100));
+  --color-secondary-200: hsl(var(--color-secondary-200));
+  --color-secondary-300: hsl(var(--color-secondary-300));
+  --color-secondary-400: hsl(var(--color-secondary-400));
+  --color-secondary-500: hsl(var(--color-secondary-500));
+  --color-secondary-600: hsl(var(--color-secondary-600));
+  --color-secondary-700: hsl(var(--color-secondary-700));
+  --color-secondary-800: hsl(var(--color-secondary-800));
+  --color-secondary-900: hsl(var(--color-secondary-900));
+
+  --color-neutral-50: hsl(var(--color-neutral-50));
+  --color-neutral-100: hsl(var(--color-neutral-100));
+  --color-neutral-200: hsl(var(--color-neutral-200));
+  --color-neutral-300: hsl(var(--color-neutral-300));
+  --color-neutral-400: hsl(var(--color-neutral-400));
+  --color-neutral-500: hsl(var(--color-neutral-500));
+  --color-neutral-600: hsl(var(--color-neutral-600));
+  --color-neutral-700: hsl(var(--color-neutral-700));
+  --color-neutral-800: hsl(var(--color-neutral-800));
+  --color-neutral-900: hsl(var(--color-neutral-900));
+
+  --color-success: hsl(var(--color-success));
+  --color-warning: hsl(var(--color-warning));
+  --color-error: hsl(var(--color-error));
+  --color-info: hsl(var(--color-info));
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+
+  --shadow-sm: var(--shadow-color-sm);
+  --shadow-md: var(--shadow-color-md);
+  --shadow-lg: var(--shadow-color-lg);
+  --shadow-xl: var(--shadow-color-xl);
+  --shadow-primary: var(--shadow-primary);
+  --shadow-secondary: var(--shadow-secondary);
+
+  --spacing-touch: 44px;
+  --spacing-touch-lg: 52px;
+  --spacing-touch-xl: 60px;
+
+  /* z-scale: none of these were wired up before, so `z-sticky`/`z-dropdown`/
+     `z-popover`/`z-modal` were unrecognized Tailwind utilities that compiled
+     to no CSS at all - the sticky header, dropdown menu, popovers, selects,
+     and dialogs were all rendering with z-index:auto and stacking purely by
+     DOM order, which is what let feed-page content scroll on top of the nav
+     header. Tailwind v4's theme namespace for z-index utilities is
+     `--z-index-*` (not `--z-*`, unlike most other utility namespaces) - a
+     first pass at this fix used `--z-*` and silently produced no CSS at all. */
+  --z-index-sticky: 40;
+  --z-index-dropdown: 45;
+  --z-index-popover: 50;
+  --z-index-modal: 60;
+
+  --animate-fade-in-up: fadeInUp var(--duration-normal) var(--ease-out) forwards;
+  --animate-scale-in: scaleIn var(--duration-normal) var(--ease-spring) forwards;
+  --animate-slide-in-bottom: slideInBottom var(--duration-slow) var(--ease-out) forwards;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-pulse-subtle: pulse 2s var(--ease-in-out) infinite;
+  --animate-grow-x: growX var(--duration-slower) var(--ease-out) both;
+  --animate-slide-in-left: slideInLeft var(--duration-slow) var(--ease-out) both;
+  --animate-slide-in-right: slideInRight var(--duration-slow) var(--ease-out) both;
+  --animate-fade-in: fadeIn var(--duration-normal) var(--ease-out) both;
+  --animate-hero-zoom: heroZoom 1400ms var(--ease-out) both;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-body);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.15) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .card-interactive {
+    transition:
+      transform var(--duration-slow) var(--ease-spring),
+      box-shadow var(--duration-slow) var(--ease-out),
+      border-color var(--duration-normal) var(--ease-out);
+  }
+  .card-interactive:hover {
+    box-shadow: var(--shadow-color-xl);
+    transform: translateY(-4px);
+    border-color: hsl(var(--primary) / 0.35);
+  }
+  .card-interactive:active {
+    transform: translateY(-1px) scale(0.99);
+    transition-duration: var(--duration-fast);
+  }
+
+  /* ── Listing tiles ─────────────────────────────────────────────
+     Shared anatomy for idea / opportunity / business tiles: a cover
+     (image or tinted band) that zooms on hover, a light sheen sweeping
+     across it, and a "view" arrow that nudges forward. */
+  .tile-cover {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .tile-cover-media {
+    transition: transform var(--duration-slower) var(--ease-out);
+  }
+  .group:hover .tile-cover-media {
+    transform: scale(1.06);
+  }
+  .tile-cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+    transform: translateX(-120%);
+  }
+  .group:hover .tile-cover::after {
+    transform: translateX(120%);
+    transition: transform 900ms var(--ease-out);
+  }
+  .tile-arrow {
+    transition:
+      transform var(--duration-normal) var(--ease-spring),
+      opacity var(--duration-normal) var(--ease-out);
+    opacity: 0.55;
+  }
+  .group:hover .tile-arrow {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+  /* Subtle dot texture for covers without an image - on its own layer so it doesn't
+     inherit (and tile) the element's gradient background. Must sit on a positioned element. */
+  .tile-pattern::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgb(255 255 255 / 0.35) 1px, transparent 1.5px);
+    background-size: 16px 16px;
+    mask-image: linear-gradient(115deg, black 10%, transparent 75%);
+    opacity: 0.6;
+  }
+
+  /* ── Entrance choreography ─────────────────────────────────────
+     Items in a list fade up one after another; --stagger is the item's
+     position within the page just loaded (capped so long pages don't lag). */
+  /* fill-mode "both" (not a base opacity:0) hides items only while the animation runs,
+     so content is never stuck invisible if animations are disabled. */
+  .stagger-in {
+    animation: fadeInUp var(--duration-slower) var(--ease-out) both;
+    animation-delay: calc(min(var(--stagger, 0), 11) * 55ms);
+  }
+  .page-in {
+    animation: pageIn var(--duration-slower) var(--ease-out) both;
+  }
+  /* Scroll reveal - toggled by <Reveal>; content stays visible without JS. */
+  [data-reveal="pending"] {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  [data-reveal="shown"] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--duration-slower) var(--ease-out),
+      transform var(--duration-slower) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .float-slow {
+    animation: floatY 4s var(--ease-in-out) infinite;
+  }
+  .pulse-dot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: pulseRing 1.6s var(--ease-out) infinite;
+  }
+  .gradient-underline {
+    background-image: linear-gradient(90deg, hsl(var(--color-primary-500)), hsl(var(--color-secondary-500)));
+    background-size: 200% 100%;
+    animation: gradientShift 6s var(--ease-in-out) infinite alternate;
+  }
+
+  .btn-primary-glow {
+    box-shadow: var(--shadow-primary);
+  }
+  .btn-secondary-glow {
+    box-shadow: var(--shadow-secondary);
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes heroZoom {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes gradientShift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@keyframes growX {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal="pending"], .stagger-in {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Admin dashboard layer
+   ============================================================ */
+@layer components {
+  /* Frosted panels used by the top bar and floating surfaces. */
+  .glass {
+    background: hsl(var(--card) / 0.72);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+  }
+
+  /* Soft brand aura behind the page - two slow-drifting radial glows. */
+  .app-aura {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40rem 28rem at 12% -8%, hsl(var(--color-primary-500) / 0.10), transparent 70%),
+      radial-gradient(34rem 24rem at 100% 0%, hsl(var(--color-secondary-500) / 0.08), transparent 70%);
+    animation: auraDrift 18s var(--ease-in-out) infinite alternate;
+  }
+
+  /* KPI cards: a hairline gradient border that lights up on hover. */
+  .stat-card {
+    position: relative;
+    isolation: isolate;
+  }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--color-primary-400) / 0.55), transparent 40%, hsl(var(--color-secondary-400) / 0.45));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+  .stat-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Sidebar active item: glowing indicator bar. */
+  .nav-indicator {
+    box-shadow: 0 0 12px 1px hsl(var(--color-primary-500) / 0.55);
+  }
+
+  /* Table rows ease their background; the actions column fades in on hover. */
+  .row-actions {
+    opacity: 0.55;
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+  tr:hover .row-actions,
+  tr:focus-within .row-actions {
+    opacity: 1;
+  }
+
+  .animate-drift {
+    animation: drift 14s var(--ease-in-out) infinite;
+  }
+
+  /* Live dot (e.g. "queue live") */
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: pulseRing 1.8s var(--ease-out) infinite;
+  }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.08); }
+}
+
+@keyframes auraDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-2%, 2%, 0) scale(1.05); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-aura, .animate-drift { animation: none; }
+}
