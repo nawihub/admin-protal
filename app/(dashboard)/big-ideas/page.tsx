@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { Lightbulb, Paperclip } from "lucide-react";
 import { RequireArea } from "@/components/auth/require-area";
 import { PageHeader } from "@/components/data/page-header";
-import { DataTable, type Column } from "@/components/data/data-table";
+import { type Column } from "@/components/data/data-table";
+import { Collection } from "@/components/data/collection";
+import { ViewToggle } from "@/components/data/view-toggle";
+import { IdeaCard } from "@/components/cards/idea-card";
 import { SearchInput, Segments } from "@/components/data/filters";
 import { StatusBadge, Tag } from "@/components/data/status-badge";
 import { ideasApi } from "@/lib/api/admin";
 import { useCursorList } from "@/lib/queries/use-cursor-list";
 import { useIdeaCount } from "@/lib/queries/counts";
 import { useUrlState } from "@/lib/hooks/use-url-state";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { formatEnumLabel } from "@/lib/utils";
 import { initialsOf, timeAgo } from "@/lib/format";
 import type { Idea } from "@/lib/api/types";
@@ -64,6 +68,7 @@ const COLUMNS: Column<Idea>[] = [
 function BigIdeasList() {
   const router = useRouter();
   const { values, update } = useUrlState(["status", "q"] as const);
+  const [view, setView] = useViewMode("ideas");
   const status = values.status || "PUBLISHED";
   const list = useCursorList(["ideas", "list", status, values.q], (pageToken) =>
     ideasApi.list({ pageSize: 20, pageToken, status: status === "ALL" ? undefined : status, searchQuery: values.q || undefined }),
@@ -90,10 +95,15 @@ function BigIdeasList() {
             { value: "ALL", label: "All" },
           ]}
         />
-        <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search ideas or applicants…" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search ideas or applicants…" />
+          <ViewToggle value={view} onChange={setView} />
+        </div>
       </div>
-      <DataTable
+      <Collection
+        view={view}
         columns={COLUMNS}
+        renderCard={(i) => <IdeaCard idea={i} />}
         rows={list.items}
         getKey={(i) => i.id}
         onRowClick={(i) => router.push(`/big-ideas/${i.id}`)}

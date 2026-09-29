@@ -8,7 +8,10 @@ import { RequireArea } from "@/components/auth/require-area";
 import { Can } from "@/components/auth/can";
 import { BackLink } from "@/components/data/detail";
 import { PageHeader } from "@/components/data/page-header";
-import { DataTable, type Column } from "@/components/data/data-table";
+import { type Column } from "@/components/data/data-table";
+import { Collection } from "@/components/data/collection";
+import { ViewToggle } from "@/components/data/view-toggle";
+import { ResourceCard } from "@/components/cards/resource-card";
 import { SearchInput, Segments } from "@/components/data/filters";
 import { StatusBadge, Tag } from "@/components/data/status-badge";
 import { ResourceDrawer, ResourceIcon } from "@/components/resources/resource-drawer";
@@ -16,6 +19,7 @@ import { UploadDialog } from "@/components/resources/upload-dialog";
 import { resourcesApi } from "@/lib/api/admin";
 import { useCursorList } from "@/lib/queries/use-cursor-list";
 import { useUrlState } from "@/lib/hooks/use-url-state";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { formatEnumLabel, formatFileSize } from "@/lib/utils";
 import { timeAgo } from "@/lib/format";
 import type { Resource } from "@/lib/api/types";
@@ -45,6 +49,7 @@ const COLUMNS: Column<Resource>[] = [
 
 function FolderView({ folderId }: { folderId: string }) {
   const { values, update } = useUrlState(["status", "q"] as const);
+  const [view, setView] = useViewMode("resources");
   const status = values.status || "ALL";
   const [uploading, setUploading] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -79,10 +84,15 @@ function FolderView({ folderId }: { folderId: string }) {
             { value: "REJECTED", label: "Rejected", count: status === "REJECTED" ? list.total : undefined },
           ]}
         />
-        <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search this folder…" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search this folder…" />
+          <ViewToggle value={view} onChange={setView} />
+        </div>
       </div>
-      <DataTable
+      <Collection
+        view={view}
         columns={COLUMNS}
+        renderCard={(r) => <ResourceCard resource={r} onOpen={() => setOpenId(r.id)} />}
         rows={list.items}
         getKey={(r) => r.id}
         onRowClick={(r) => setOpenId(r.id)}

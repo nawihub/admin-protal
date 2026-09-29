@@ -3,13 +3,16 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Ban, ChevronLeft, ChevronRight, Crown, KeyRound, Lock, MoreHorizontal, PlayCircle, RotateCcw, ShieldCheck, Trash2, UserPlus } from "lucide-react";
+import { Ban, ChevronLeft, ChevronRight, Crown, Eye, KeyRound, Lock, Minus, MoreHorizontal, PlayCircle, RotateCcw, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RequireArea } from "@/components/auth/require-area";
 import { Can } from "@/components/auth/can";
 import { PageHeader } from "@/components/data/page-header";
-import { DataTable, type Column } from "@/components/data/data-table";
+import { type Column } from "@/components/data/data-table";
+import { Collection } from "@/components/data/collection";
+import { ViewToggle } from "@/components/data/view-toggle";
+import { Tile, gradientFor } from "@/components/cards/tile";
 import { SearchInput, Segments } from "@/components/data/filters";
 import { StatusBadge, Tag } from "@/components/data/status-badge";
 import { ConfirmDialog } from "@/components/data/action-dialogs";
@@ -21,6 +24,9 @@ import { usersApi } from "@/lib/api/admin";
 import { usePermissions } from "@/lib/auth/use-permissions";
 import { useAction } from "@/lib/hooks/use-action";
 import { useUrlState } from "@/lib/hooks/use-url-state";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
+import { AREA_PERMISSIONS, canManage, canRead, type Area } from "@/lib/auth/permissions";
+import { cn } from "@/lib/utils";
 import { useAdminCount } from "@/lib/queries/counts";
 import { timeAgo } from "@/lib/format";
 import type { ManagedUser } from "@/lib/api/types";
@@ -60,11 +66,77 @@ function RowActions({ user, onAction }: { user: ManagedUser; onAction: (a: "perm
   );
 }
 
+
+const AREA_LABELS: [Area, string][] = [
+  ["bigIdeas", "Ideas"], ["opportunities", "Opportunities"], ["businesses", "Businesses"],
+  ["entrepreneurs", "Entrepreneurs"], ["resources", "Resources"], ["adminUsers", "Admins"], ["auditLogs", "Audit"],
+];
+
+/** An admin as a card: identity, role and a per-area access map (view / manage). */
+function AdminCard({ user, actions, onOpen }: { user: ManagedUser; actions: React.ReactNode; onOpen?: () => void }) {
+  const name = `${user.firstName} ${user.lastName}`;
+  const superAdmin = user.permissions.includes("FULL_ACCESS");
+  return (
+    <Tile>
+      <div className="relative flex flex-1 flex-col gap-4 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <span className={cn(
+            "relative flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br font-display text-lg font-semibold text-white shadow-md transition-transform duration-slow ease-spring group-hover:-rotate-3 group-hover:scale-105",
+            gradientFor(name),
+          )}>
+            {initials(user.firstName, user.lastName)}
+            {superAdmin && <Crown className="absolute -right-2 -top-2 size-6 rounded-full bg-card p-1 text-secondary-500 shadow" aria-label="Super admin" />}
+          </span>
+          <div className="relative z-[2] flex items-center gap-1">
+            <StatusBadge status={user.status} label={user.status === "PENDING" ? "Invited" : undefined} />
+            {actions}
+          </div>
+        </div>
+        <div className="min-w-0">
+          {onOpen ? (
+            <button type="button" onClick={onOpen} className="truncate text-left font-display text-lg font-semibold outline-none after:absolute after:inset-0 after:z-[1] after:content-[''] group-hover:text-primary-700 dark:group-hover:text-primary-300">
+              {name}
+            </button>
+          ) : (
+            <p className="truncate font-display text-lg font-semibold">{name}</p>
+          )}
+          <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+          <p className="mt-1 text-xs font-medium text-muted-foreground">{roleLabel(user.permissions)}</p>
+        </div>
+        <ul className="grid grid-cols-2 gap-1.5 text-xs" aria-label="Access by area">
+          {AREA_LABELS.map(([area, label], i) => {
+            const manage = AREA_PERMISSIONS[area].manage && canManage(user, area);
+            const read = canRead(user, area);
+            return (
+              <li
+                key={area}
+                title={`${label}: ${manage ? "can manage" : read ? "can view" : "no access"}`}
+                className={cn(
+                  "stagger-in flex min-w-0 items-center gap-1.5 rounded-lg px-2 py-1",
+                  manage ? "bg-primary-500/10 text-primary-700 dark:text-primary-300" : read ? "bg-muted text-foreground" : "text-muted-foreground/50",
+                )}
+                style={{ "--stagger": i } as React.CSSProperties}
+              >
+                {manage ? <ShieldCheck className="size-3.5 shrink-0" /> : read ? <Eye className="size-3.5 shrink-0" /> : <Minus className="size-3.5 shrink-0" />}
+                <span className="truncate">{label}</span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-auto border-t border-border/70 pt-3 text-xs text-muted-foreground">
+          {user.lastLoginTime ? `Last signed in ${timeAgo(user.lastLoginTime)}` : "Hasn't signed in yet"} · {user.loginCount} sign-ins
+        </p>
+      </div>
+    </Tile>
+  );
+}
+
 function Team() {
   const router = useRouter();
   const params = useSearchParams();
-  const { canRead } = usePermissions();
+  const { canRead: viewerCanRead } = usePermissions();
   const { values, update } = useUrlState(["status", "q", "page"] as const);
+  const [view, setView] = useViewMode("users");
   const status = values.status || "ALL";
   const page = Math.max(0, Number(values.page) || 0);
   const [creating, setCreating] = useState(params.get("new") === "1");
@@ -84,6 +156,18 @@ function Team() {
   const deactivate = useAction((u: ManagedUser) => usersApi.deactivate(u.id), { success: (u) => `${u.firstName} disabled`, invalidate });
   const reset = useAction((u: ManagedUser) => usersApi.resetPassword(u.id), { success: "Password reset - share the new sign-in code", invalidate });
   const remove = useAction((u: ManagedUser) => usersApi.remove(u.id), { success: "Admin deleted", invalidate });
+
+  const rowActions = (u: ManagedUser) => (
+    <RowActions
+      user={u}
+      onAction={(a) => {
+        if (a === "permissions") setEditing(u);
+        else if (a === "code") setCodeFor(u);
+        else if (a === "activate") activate.mutate(u);
+        else setConfirm({ kind: a, user: u });
+      }}
+    />
+  );
 
   const columns: Column<ManagedUser>[] = [
     {
@@ -111,17 +195,7 @@ function Team() {
       key: "actions",
       header: "",
       className: "w-12 text-right",
-      cell: (u) => (
-        <RowActions
-          user={u}
-          onAction={(a) => {
-            if (a === "permissions") setEditing(u);
-            else if (a === "code") setCodeFor(u);
-            else if (a === "activate") activate.mutate(u);
-            else setConfirm({ kind: a, user: u });
-          }}
-        />
-      ),
+      cell: (u) => rowActions(u),
     },
   ];
 
@@ -145,13 +219,24 @@ function Team() {
             { value: "DISABLED", label: "Disabled", count: counts.DISABLED },
           ]}
         />
-        <SearchInput value={values.q} onChange={(q) => update({ q, page: "" })} placeholder="Search name, email or username…" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <SearchInput value={values.q} onChange={(q) => update({ q, page: "" })} placeholder="Search name, email or username…" />
+          <ViewToggle value={view} onChange={setView} />
+        </div>
       </div>
-      <DataTable
+      <Collection
+        view={view}
         columns={columns}
+        renderCard={(u) => (
+          <AdminCard
+            user={u}
+            actions={rowActions(u)}
+            onOpen={viewerCanRead("auditLogs") ? () => router.push(`/audit-logs?userId=${u.id}`) : undefined}
+          />
+        )}
         rows={data?.content ?? []}
         getKey={(u) => u.id}
-        onRowClick={canRead("auditLogs") ? (u) => router.push(`/audit-logs?userId=${u.id}`) : undefined}
+        onRowClick={viewerCanRead("auditLogs") ? (u) => router.push(`/audit-logs?userId=${u.id}`) : undefined}
         loading={users.isLoading}
         error={users.isError}
         onRetry={() => users.refetch()}

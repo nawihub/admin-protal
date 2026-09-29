@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { BadgeCheck, Star } from "lucide-react";
 import { RequireArea } from "@/components/auth/require-area";
 import { PageHeader } from "@/components/data/page-header";
-import { DataTable, type Column } from "@/components/data/data-table";
+import { type Column } from "@/components/data/data-table";
+import { Collection } from "@/components/data/collection";
+import { ViewToggle } from "@/components/data/view-toggle";
+import { EntrepreneurCard } from "@/components/cards/entrepreneur-card";
 import { SearchInput, Segments } from "@/components/data/filters";
 import { StatusBadge } from "@/components/data/status-badge";
 import { entrepreneursApi } from "@/lib/api/admin";
 import { useCursorList } from "@/lib/queries/use-cursor-list";
 import { useEntrepreneurCount } from "@/lib/queries/counts";
 import { useUrlState } from "@/lib/hooks/use-url-state";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { ScoreRing } from "@/components/data/score-ring";
 import { initialsOf, timeAgo } from "@/lib/format";
 import type { Entrepreneur } from "@/lib/api/types";
@@ -45,6 +49,7 @@ const COLUMNS: Column<Entrepreneur>[] = [
 function EntrepreneursList() {
   const router = useRouter();
   const { values, update } = useUrlState(["status", "q"] as const);
+  const [view, setView] = useViewMode("entrepreneurs");
   const status = values.status || "ALL";
   const filter = status === "VETTED" ? { vetted: true } : status === "ALL" ? {} : { status };
   const list = useCursorList(["entrepreneurs", "list", status, values.q], (pageToken) =>
@@ -73,10 +78,15 @@ function EntrepreneursList() {
             { value: "SUSPENDED", label: "Suspended", count: counts.SUSPENDED },
           ]}
         />
-        <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search entrepreneurs…" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search entrepreneurs…" />
+          <ViewToggle value={view} onChange={setView} />
+        </div>
       </div>
-      <DataTable
+      <Collection
+        view={view}
         columns={COLUMNS}
+        renderCard={(e) => <EntrepreneurCard entrepreneur={e} />}
         rows={list.items}
         getKey={(e) => e.id}
         onRowClick={(e) => router.push(`/entrepreneurs/${e.id}`)}

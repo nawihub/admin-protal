@@ -622,3 +622,45 @@
 @media (prefers-reduced-motion: reduce) {
   .app-aura, .animate-drift { animation: none; }
 }
+
+/* Grid-view tiles: a soft spotlight follows the cursor and the card tilts a few degrees toward
+   it (Tile sets --mx/--my/--rx/--ry on pointer move). The entrance stagger runs on a wrapper,
+   because an animation's fill would otherwise pin the tile's transform. */
+@layer components {
+  .tile {
+    position: relative;
+    isolation: isolate;
+    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px));
+    transition:
+      transform var(--duration-slow) var(--ease-out),
+      box-shadow var(--duration-slow) var(--ease-out),
+      border-color var(--duration-normal) var(--ease-out);
+  }
+  .tile:hover {
+    --lift: -4px;
+    border-color: hsl(var(--color-primary-500) / 0.35);
+    box-shadow: 0 22px 44px -22px hsl(160 60% 20% / 0.45), 0 2px 6px -2px hsl(0 0% 0% / 0.08);
+  }
+  .tile:focus-within {
+    outline: 2px solid hsl(var(--color-primary-500) / 0.6);
+    outline-offset: 2px;
+  }
+  .tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), hsl(var(--color-primary-400) / 0.14), transparent 55%);
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+  .tile:hover::after { opacity: 1; }
+  .dark .tile:hover { box-shadow: 0 22px 44px -20px hsl(0 0% 0% / 0.7), 0 0 0 1px hsl(var(--color-primary-400) / 0.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .tile:hover { transform: none; }
+}
+

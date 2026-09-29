@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { HandCoins } from "lucide-react";
 import { RequireArea } from "@/components/auth/require-area";
 import { PageHeader } from "@/components/data/page-header";
-import { DataTable, type Column } from "@/components/data/data-table";
+import { type Column } from "@/components/data/data-table";
+import { Collection } from "@/components/data/collection";
+import { ViewToggle } from "@/components/data/view-toggle";
+import { OpportunityCard } from "@/components/cards/opportunity-card";
 import { SearchInput, Segments } from "@/components/data/filters";
 import { StatusBadge, Tag } from "@/components/data/status-badge";
 import { opportunitiesApi } from "@/lib/api/admin";
 import { useCursorList } from "@/lib/queries/use-cursor-list";
 import { useOpportunityCount } from "@/lib/queries/counts";
 import { useUrlState } from "@/lib/hooks/use-url-state";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { formatEnumLabel } from "@/lib/utils";
 import { timeAgo } from "@/lib/format";
 import { Deadline } from "@/components/data/deadline";
@@ -52,6 +56,7 @@ const COLUMNS: Column<Opportunity>[] = [
 function OpportunitiesList() {
   const router = useRouter();
   const { values, update } = useUrlState(["status", "q"] as const);
+  const [view, setView] = useViewMode("opportunities");
   const status = values.status || "PENDING";
   const list = useCursorList(["opportunities", "list", status, values.q], (pageToken) =>
     opportunitiesApi.list({ pageSize: 20, pageToken, status: status === "ALL" ? undefined : status, searchQuery: values.q || undefined }),
@@ -78,10 +83,15 @@ function OpportunitiesList() {
             { value: "ALL", label: "All" },
           ]}
         />
-        <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search opportunities…" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <SearchInput value={values.q} onChange={(q) => update({ q })} placeholder="Search opportunities…" />
+          <ViewToggle value={view} onChange={setView} />
+        </div>
       </div>
-      <DataTable
+      <Collection
+        view={view}
         columns={COLUMNS}
+        renderCard={(o) => <OpportunityCard opportunity={o} />}
         rows={list.items}
         getKey={(o) => o.id}
         onRowClick={(o) => router.push(`/opportunities/${o.id}`)}
