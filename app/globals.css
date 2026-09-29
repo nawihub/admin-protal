@@ -265,10 +265,12 @@
      header. Tailwind v4's theme namespace for z-index utilities is
      `--z-index-*` (not `--z-*`, unlike most other utility namespaces) - a
      first pass at this fix used `--z-*` and silently produced no CSS at all. */
+  /* Menus, selects and tooltips can open from inside a dialog, so they stack above it -
+     with the modal on top, a select in a form dialog opened hidden behind the dialog. */
   --z-index-sticky: 40;
-  --z-index-dropdown: 45;
-  --z-index-popover: 50;
-  --z-index-modal: 60;
+  --z-index-modal: 50;
+  --z-index-dropdown: 60;
+  --z-index-popover: 70;
 
   --animate-fade-in-up: fadeInUp var(--duration-normal) var(--ease-out) forwards;
   --animate-scale-in: scaleIn var(--duration-normal) var(--ease-spring) forwards;
