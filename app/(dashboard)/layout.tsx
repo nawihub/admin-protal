@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
 import { CommandPalette } from "@/components/shell/command-palette";
+import { BatchJobWatcher } from "@/components/notifications/batch-job-watcher";
 import { Logo } from "@/components/logo";
 import { useAuthStore } from "@/lib/store/auth-store";
 
@@ -80,6 +81,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <BatchJobWatcher />
     </div>
   );
 }

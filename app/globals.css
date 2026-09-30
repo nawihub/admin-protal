@@ -664,6 +664,16 @@
   .tile, .tile:hover { transform: none; }
 }
 
+
+/* Notifications bell: a short ring when something new arrives. */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(3deg); }
+}
+
 /* Scrollable dropdown lists: a thin scrollbar that stays visible (macOS otherwise hides it until
    you scroll, so long lists don't look scrollable). */
 /* Firefox only: in Chromium, setting these makes it ignore the ::-webkit-scrollbar styles below

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu, Search, UserRound } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsBell } from "@/components/notifications/notifications-bell";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -55,6 +56,7 @@ export function Topbar({ onOpenMenu, onOpenPalette }: { onOpenMenu: () => void; 
         <Search className="size-5" />
       </button>
 
+      <NotificationsBell />
       <ThemeToggle />
 
       <DropdownMenu>

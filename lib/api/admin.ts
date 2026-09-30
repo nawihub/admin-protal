@@ -1,6 +1,6 @@
 import { api } from "@/lib/api/http";
 import type {
-  AuditLog, Business, CategoryAnalysis, CursorPage, Entrepreneur, Folder, Idea, Journey, ManagedUser,
+  AuditLog, BatchJob, Business, CategoryAnalysis, CursorPage, Entrepreneur, Folder, Idea, Journey, ManagedUser,
   OffsetPage, Opportunity, Permission, Resource, Venture,
 } from "@/lib/api/types";
 
@@ -113,4 +113,10 @@ export const usersApi = {
 export const auditApi = {
   list: (q: { action?: string; resource?: string; userId?: string; query?: string; dateFrom?: string; dateTo?: string; page?: number; size?: number }) =>
     api.get<OffsetPage<AuditLog>>("/api/v1/audit-logs", { query: q as Q }),
+};
+
+// ─── Background batch jobs ──────────────────────────────────────────────────
+export const batchJobsApi = {
+  /** The signed-in admin's recent batch deletions across every area they manage, newest first. */
+  recent: (limit = 20) => api.get<BatchJob[]>("/api/v1/batch-jobs", { query: { limit } }),
 };

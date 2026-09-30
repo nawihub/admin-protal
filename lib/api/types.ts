@@ -296,3 +296,29 @@ export interface Resource {
   createTime: string;
   updateTime: string;
 }
+
+// ─── Background batch jobs ──────────────────────────────────────────────────
+
+export type BatchJobArea = "big-ideas" | "opportunities" | "resources";
+export type BatchJobStatus = "QUEUED" | "RUNNING" | "COMPLETED";
+
+export interface BatchJobItem {
+  id: string;
+  status: "PENDING" | "SUCCEEDED" | "FAILED";
+  /** On failure, what the single delete would have returned, e.g. NOT_FOUND. */
+  errorCode: string | null;
+  errorMessage: string | null;
+}
+
+/** A background batch deletion - GET /api/v1/batch-jobs. */
+export interface BatchJob {
+  id: string;
+  area: BatchJobArea;
+  status: BatchJobStatus;
+  total: number;
+  succeeded: number;
+  failed: number;
+  items: BatchJobItem[];
+  createTime: string;
+  completedTime: string | null;
+}
