@@ -10,6 +10,9 @@ import { BackLink } from "@/components/data/detail";
 import { PageHeader } from "@/components/data/page-header";
 import { type Column } from "@/components/data/data-table";
 import { Collection } from "@/components/data/collection";
+import { BatchActionBar } from "@/components/data/batch-action-bar";
+import { useSelection } from "@/lib/hooks/use-selection";
+import { usePermissions } from "@/lib/auth/use-permissions";
 import { ViewToggle } from "@/components/data/view-toggle";
 import { ResourceCard } from "@/components/cards/resource-card";
 import { SearchInput, Segments } from "@/components/data/filters";
@@ -57,6 +60,10 @@ function FolderView({ folderId }: { folderId: string }) {
   const list = useCursorList(["resources", "list", folderId, status, values.q], (pageToken) =>
     resourcesApi.inFolder(folderId, { pageSize: 20, pageToken, status: status === "ALL" ? undefined : status, query: values.q || undefined }),
   );
+  const { canManage } = usePermissions();
+  const canDelete = canManage("resources");
+  const selection = useSelection();
+  const selectedIds = list.items.map((r) => r.id).filter((id) => selection.selected.has(id));
   // Look the open resource up in the list so the drawer reflects moderation changes on refetch.
   const open = list.items.find((r) => r.id === openId) ?? null;
 
@@ -90,6 +97,7 @@ function FolderView({ folderId }: { folderId: string }) {
         </div>
       </div>
       <Collection
+        selection={canDelete ? { selected: selection.selected, onToggle: selection.toggle, onToggleAll: selection.toggleAll } : undefined}
         view={view}
         columns={COLUMNS}
         renderCard={(r) => <ResourceCard resource={r} onOpen={() => setOpenId(r.id)} />}
@@ -105,6 +113,9 @@ function FolderView({ folderId }: { folderId: string }) {
         onLoadMore={() => list.fetchNextPage()}
         empty={{ title: "No resources here", description: "Upload a document or video to get started." }}
       />
+      {canDelete && (
+        <BatchActionBar area="resources" selectedIds={selectedIds} onClear={selection.clear} onDelete={resourcesApi.batchDelete} />
+      )}
       <ResourceDrawer resource={open} onClose={() => setOpenId(null)} />
       <UploadDialog folderId={folderId} open={uploading} onOpenChange={setUploading} />
     </>

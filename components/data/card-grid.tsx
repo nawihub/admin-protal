@@ -2,12 +2,14 @@
 
 import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { ListSelection } from "@/components/data/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /** The card counterpart of DataTable: same loading, empty, error and load-more states. */
 export function CardGrid<T>({
-  rows, getKey, renderCard, loading, error, onRetry, fetching, hasMore, loadingMore, onLoadMore,
+  rows, getKey, renderCard, loading, error, onRetry, fetching, hasMore, loadingMore, onLoadMore, selection,
   empty = { title: "Nothing here yet", description: "Items will show up here as they arrive." },
 }: {
   rows: T[];
@@ -20,8 +22,10 @@ export function CardGrid<T>({
   hasMore?: boolean;
   loadingMore?: boolean;
   onLoadMore?: () => void;
+  selection?: ListSelection;
   empty?: { title: string; description?: string };
 }) {
+  const selecting = !!selection && rows.some((r) => selection.selected.has(getKey(r)));
   if (loading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
@@ -61,8 +65,27 @@ export function CardGrid<T>({
       <div className={cn("grid gap-4 transition-opacity duration-normal sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4", fetching && "opacity-60")}>
         {rows.map((row, i) => (
           // The stagger lives on this wrapper: an animation's fill would otherwise pin the tile's transform.
-          <div key={getKey(row)} className="stagger-in" style={{ "--stagger": i % 12 } as React.CSSProperties}>
-            {renderCard(row, i)}
+          <div key={getKey(row)} className="stagger-in group/select relative" style={{ "--stagger": i % 12 } as React.CSSProperties}>
+            <div className={cn("h-full rounded-2xl transition-shadow duration-normal", selection?.selected.has(getKey(row)) && "ring-2 ring-primary-500 ring-offset-2 ring-offset-background")}>
+              {renderCard(row, i)}
+            </div>
+            {selection && (
+              // Floats just outside the card's corner so it never covers the cover's chips.
+              <span
+                className={cn(
+                  "absolute -left-2 -top-2 z-[3] flex size-7 items-center justify-center rounded-full bg-card shadow-md ring-1 ring-border transition-all duration-normal ease-spring",
+                  selecting || selection.selected.has(getKey(row))
+                    ? "scale-100 opacity-100"
+                    : "scale-75 opacity-0 group-hover/select:scale-100 group-hover/select:opacity-100 group-focus-within/select:scale-100 group-focus-within/select:opacity-100",
+                )}
+              >
+                <Checkbox
+                  checked={selection.selected.has(getKey(row))}
+                  onCheckedChange={() => selection.onToggle(getKey(row))}
+                  aria-label="Select"
+                />
+              </span>
+            )}
           </div>
         ))}
       </div>

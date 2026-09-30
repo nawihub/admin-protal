@@ -7,6 +7,9 @@ import { RequireArea } from "@/components/auth/require-area";
 import { PageHeader } from "@/components/data/page-header";
 import { type Column } from "@/components/data/data-table";
 import { Collection } from "@/components/data/collection";
+import { BatchActionBar } from "@/components/data/batch-action-bar";
+import { useSelection } from "@/lib/hooks/use-selection";
+import { usePermissions } from "@/lib/auth/use-permissions";
 import { ViewToggle } from "@/components/data/view-toggle";
 import { IdeaCard } from "@/components/cards/idea-card";
 import { SearchInput, Segments } from "@/components/data/filters";
@@ -73,6 +76,10 @@ function BigIdeasList() {
   const list = useCursorList(["ideas", "list", status, values.q], (pageToken) =>
     ideasApi.list({ pageSize: 20, pageToken, status: status === "ALL" ? undefined : status, searchQuery: values.q || undefined }),
   );
+  const { canManage } = usePermissions();
+  const canDelete = canManage("bigIdeas");
+  const selection = useSelection();
+  const selectedIds = list.items.map((i) => i.id).filter((id) => selection.selected.has(id));
   const counts = {
     PUBLISHED: useIdeaCount("PUBLISHED").data,
     IN_REVIEW: useIdeaCount("IN_REVIEW").data,
@@ -101,6 +108,7 @@ function BigIdeasList() {
         </div>
       </div>
       <Collection
+        selection={canDelete ? { selected: selection.selected, onToggle: selection.toggle, onToggleAll: selection.toggleAll } : undefined}
         view={view}
         columns={COLUMNS}
         renderCard={(i) => <IdeaCard idea={i} />}
@@ -116,6 +124,9 @@ function BigIdeasList() {
         onLoadMore={() => list.fetchNextPage()}
         empty={{ title: "No ideas here", description: status === "PUBLISHED" ? "Nothing is waiting for review - nice work." : "Try another status or search." }}
       />
+      {canDelete && (
+        <BatchActionBar area="big-ideas" selectedIds={selectedIds} onClear={selection.clear} onDelete={ideasApi.batchDelete} />
+      )}
     </>
   );
 }

@@ -7,6 +7,9 @@ import { RequireArea } from "@/components/auth/require-area";
 import { PageHeader } from "@/components/data/page-header";
 import { type Column } from "@/components/data/data-table";
 import { Collection } from "@/components/data/collection";
+import { BatchActionBar } from "@/components/data/batch-action-bar";
+import { useSelection } from "@/lib/hooks/use-selection";
+import { usePermissions } from "@/lib/auth/use-permissions";
 import { ViewToggle } from "@/components/data/view-toggle";
 import { OpportunityCard } from "@/components/cards/opportunity-card";
 import { SearchInput, Segments } from "@/components/data/filters";
@@ -61,6 +64,10 @@ function OpportunitiesList() {
   const list = useCursorList(["opportunities", "list", status, values.q], (pageToken) =>
     opportunitiesApi.list({ pageSize: 20, pageToken, status: status === "ALL" ? undefined : status, searchQuery: values.q || undefined }),
   );
+  const { canManage } = usePermissions();
+  const canDelete = canManage("opportunities");
+  const selection = useSelection();
+  const selectedIds = list.items.map((o) => o.id).filter((id) => selection.selected.has(id));
   const counts = {
     PENDING: useOpportunityCount("PENDING").data,
     IN_REVIEW: useOpportunityCount("IN_REVIEW").data,
@@ -89,6 +96,7 @@ function OpportunitiesList() {
         </div>
       </div>
       <Collection
+        selection={canDelete ? { selected: selection.selected, onToggle: selection.toggle, onToggleAll: selection.toggleAll } : undefined}
         view={view}
         columns={COLUMNS}
         renderCard={(o) => <OpportunityCard opportunity={o} />}
@@ -104,6 +112,9 @@ function OpportunitiesList() {
         onLoadMore={() => list.fetchNextPage()}
         empty={{ title: "No opportunities here", description: status === "PENDING" ? "The queue is clear." : "Try another status or search." }}
       />
+      {canDelete && (
+        <BatchActionBar area="opportunities" selectedIds={selectedIds} onClear={selection.clear} onDelete={opportunitiesApi.batchDelete} />
+      )}
     </>
   );
 }

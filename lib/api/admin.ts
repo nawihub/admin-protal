@@ -22,6 +22,8 @@ export const ideasApi = {
   decline: (id: string, reason: string) => api.post(`/api/v1/big-ideas/${id}/decline`, { reason }),
   remove: (id: string) => api.delete(`/api/v1/big-ideas/${id}`),
   material: (url: string) => api.blob(url, { timeoutMs: 120_000 }),
+  /** Deletes in the background: resolves at once with the queued job (see batchJobsApi). */
+  batchDelete: (ids: string[]) => api.post<BatchJob>("/api/v1/big-ideas/batch", { ids, action: "delete" }),
 };
 
 // ─── Opportunities ──────────────────────────────────────────────────────────
@@ -35,6 +37,8 @@ export const opportunitiesApi = {
   decline: (id: string, reason: string) => api.post(`/api/v1/opportunities/${id}/decline`, { reason }),
   remove: (id: string) => api.delete(`/api/v1/opportunities/${id}`),
   flier: (id: string) => api.blob(`/api/v1/opportunities/${id}/flier`),
+  /** Deletes in the background: resolves at once with the queued job (see batchJobsApi). */
+  batchDelete: (ids: string[]) => api.post<BatchJob>("/api/v1/opportunities/batch", { ids, action: "delete" }),
 };
 
 // ─── Businesses ─────────────────────────────────────────────────────────────
@@ -81,6 +85,8 @@ export const resourcesApi = {
   remove: (id: string) => api.delete(`/api/v1/resources/${id}`),
   download: (id: string) => api.blob(`/api/v1/resources/${id}/download`, { timeoutMs: 10 * 60_000 }),
   thumbnail: (id: string) => api.blob(`/api/v1/resources/${id}/thumbnail`),
+  /** Deletes in the background: resolves at once with the queued job (see batchJobsApi). */
+  batchDelete: (ids: string[]) => api.post<BatchJob>("/api/v1/resources/batch", { ids, action: "delete" }),
 };
 
 // ─── Admin users ────────────────────────────────────────────────────────────

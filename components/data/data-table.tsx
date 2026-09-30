@@ -2,8 +2,16 @@
 
 import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+/** Row selection for batch actions; omit to hide the checkboxes. */
+export interface ListSelection {
+  selected: ReadonlySet<string>;
+  onToggle: (id: string) => void;
+  onToggleAll: (ids: string[]) => void;
+}
 
 export interface Column<T> {
   key: string;
@@ -33,6 +41,7 @@ export function DataTable<T>({
   hasMore,
   loadingMore,
   onLoadMore,
+  selection,
   empty = { title: "Nothing here yet", description: "Items will show up here as they arrive." },
 }: {
   columns: Column<T>[];
@@ -47,14 +56,28 @@ export function DataTable<T>({
   hasMore?: boolean;
   loadingMore?: boolean;
   onLoadMore?: () => void;
+  selection?: ListSelection;
   empty?: { title: string; description?: string };
 }) {
+  const ids = rows.map(getKey);
+  const selectedCount = selection ? ids.filter((id) => selection.selected.has(id)).length : 0;
+  const headerState = selectedCount === 0 ? false : selectedCount === ids.length ? true : "indeterminate";
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40 text-left">
+              {selection && (
+                <th className="w-10 px-4 py-3">
+                  <Checkbox
+                    checked={headerState}
+                    disabled={ids.length === 0}
+                    onCheckedChange={() => selection.onToggleAll(ids)}
+                    aria-label={headerState === true ? "Deselect all" : "Select all"}
+                  />
+                </th>
+              )}
               {columns.map((col) => (
                 <th key={col.key} className={cn("whitespace-nowrap px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground", col.hideBelow && HIDE[col.hideBelow], col.className)}>
                   {col.header}
@@ -66,6 +89,7 @@ export function DataTable<T>({
             {loading &&
               Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i} className="border-b border-border/60 last:border-0">
+                  {selection && <td className="px-4 py-4" />}
                   {columns.map((col) => (
                     <td key={col.key} className={cn("px-4 py-4", col.hideBelow && HIDE[col.hideBelow])}>
                       <Skeleton className="h-4 w-full max-w-[12rem]" style={{ animationDelay: `${i * 80}ms` }} />
@@ -81,9 +105,20 @@ export function DataTable<T>({
                   className={cn(
                     "stagger-in border-b border-border/60 transition-colors duration-fast last:border-0",
                     onRowClick && "cursor-pointer hover:bg-primary-500/[0.04] dark:hover:bg-primary-400/[0.06]",
+                    selection?.selected.has(getKey(row)) && "bg-primary-500/[0.07] dark:bg-primary-400/[0.1]",
                   )}
                   style={{ "--stagger": i % 12 } as React.CSSProperties}
                 >
+                  {selection && (
+                    // Its own cell, so ticking a box never opens the row.
+                    <td className="w-10 px-4 py-3.5 align-middle" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selection.selected.has(getKey(row))}
+                        onCheckedChange={() => selection.onToggle(getKey(row))}
+                        aria-label="Select row"
+                      />
+                    </td>
+                  )}
                   {columns.map((col) => (
                     <td key={col.key} className={cn("px-4 py-3.5 align-middle", col.hideBelow && HIDE[col.hideBelow], col.className)}>
                       {col.cell(row)}
