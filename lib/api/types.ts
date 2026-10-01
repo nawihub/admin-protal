@@ -149,7 +149,8 @@ export interface Idea {
 
 // ─── Opportunities ──────────────────────────────────────────────────────────
 
-export type OpportunityStatus = "PENDING" | "IN_REVIEW" | "APPROVED" | "DECLINED";
+/** DRAFT: created by an entrepreneur and not yet submitted - only they can publish it. */
+export type OpportunityStatus = "DRAFT" | "PENDING" | "IN_REVIEW" | "APPROVED" | "DECLINED";
 
 export interface Opportunity {
   id: string;
