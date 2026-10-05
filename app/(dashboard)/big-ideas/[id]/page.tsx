@@ -105,11 +105,15 @@ function IdeaDetail({ id }: { id: string }) {
         <div className="space-y-6">
           <Section title="Applicant" index={3}>
             <p className="font-medium">{idea.applicant.fullName}</p>
-            <p className="text-sm text-muted-foreground">{formatEnumLabel(idea.applicant.submissionType)} · {idea.applicant.occupation} · {idea.applicant.age} yrs</p>
+            {/* Ideas take these from the entrepreneur's profile, which may not have all of them. */}
+            <p className="text-sm text-muted-foreground">
+              {[formatEnumLabel(idea.applicant.submissionType), idea.applicant.occupation, idea.applicant.age ? `${idea.applicant.age} yrs` : null]
+                .filter(Boolean).join(" · ")}
+            </p>
             <ul className="mt-4 space-y-2 text-sm">
               <li className="flex items-center gap-2"><Mail className="size-4 text-muted-foreground" /><a className="hover:underline" href={`mailto:${idea.applicant.email}`}>{idea.applicant.email}</a></li>
-              <li className="flex items-center gap-2"><Phone className="size-4 text-muted-foreground" />{idea.applicant.phone}</li>
-              <li className="flex items-center gap-2"><MapPin className="size-4 text-muted-foreground" />{idea.applicant.location}</li>
+              {idea.applicant.phone && <li className="flex items-center gap-2"><Phone className="size-4 text-muted-foreground" />{idea.applicant.phone}</li>}
+              {idea.applicant.location && <li className="flex items-center gap-2"><MapPin className="size-4 text-muted-foreground" />{idea.applicant.location}</li>}
             </ul>
           </Section>
           <Section title={`Supporting material (${idea.supportingMaterials.length})`} index={4}>
