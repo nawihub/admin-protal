@@ -27,6 +27,19 @@ const STATUS_TONE: Record<string, Tone> = {
   DELETED: "neutral",
   INACTIVE: "neutral",
   DRAFT: "neutral",
+  // Competitions and their applications
+  SHORTLISTING: "info",
+  PITCH_VIDEO: "info",
+  FINALS: "brand",
+  COMPLETED: "success",
+  CANCELLED: "neutral",
+  SUBMITTED: "warning",
+  SHORTLISTED: "info",
+  NOT_SHORTLISTED: "neutral",
+  FINALIST: "brand",
+  NOT_ADVANCED: "neutral",
+  WINNER: "success",
+  WITHDRAWN: "neutral",
 };
 
 // Labels that read better than the raw enum.

@@ -323,3 +323,105 @@ export interface BatchJob {
   createTime: string;
   completedTime: string | null;
 }
+
+// ─── Competitions ───────────────────────────────────────────────────────────
+export type CompetitionState = "DRAFT" | "PUBLISHED" | "SHORTLISTING" | "PITCH_VIDEO" | "FINALS" | "COMPLETED" | "CANCELLED";
+export type ApplicationState =
+  | "DRAFT" | "SUBMITTED" | "SHORTLISTED" | "NOT_SHORTLISTED" | "FINALIST" | "NOT_ADVANCED" | "WINNER" | "WITHDRAWN";
+export type QuestionType = "SHORT_TEXT" | "LONG_TEXT" | "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "YES_NO";
+
+export interface CompetitionCriterion { id: string; name: string; description: string | null; weight: number }
+export interface CompetitionQuestion {
+  id: string; prompt: string; helpText: string | null; type: QuestionType; options: string[]; required: boolean;
+}
+export interface CompetitionFinalPitch {
+  format: "PHYSICAL" | "VIRTUAL" | null; venue: string | null; meetingLink: string | null; scheduledAt: string | null;
+}
+export interface CompetitionPrize { rank: number; title: string; description: string | null }
+export interface CompetitionStats { submitted: number; shortlisted: number; pitchVideos: number; finalists: number; winners: number }
+
+export interface Competition {
+  id: string;
+  title: string;
+  tagline: string | null;
+  description: string;
+  eligibilityRequirements: string;
+  eligibleIdeaStages: string[];
+  applicationOpensAt: string;
+  applicationClosesAt: string;
+  pitchVideoDeadline: string;
+  totalFinalists: number;
+  evaluationCriteria: CompetitionCriterion[];
+  questions: CompetitionQuestion[];
+  finalPitch: CompetitionFinalPitch | null;
+  prizes: CompetitionPrize[];
+  state: CompetitionState;
+  cancelReason: string | null;
+  stateTime: string | null;
+  stats: CompetitionStats;
+  pitchVideosPurged: boolean;
+  createdBy: string;
+  createTime: string;
+  updateTime: string;
+}
+
+/** Body for creating or replacing a competition. Keep criterion/question ids to keep scores and answers attached. */
+export interface CompetitionInput {
+  title: string;
+  tagline?: string;
+  description: string;
+  eligibilityRequirements: string;
+  eligibleIdeaStages: string[];
+  applicationOpensAt: string;
+  applicationClosesAt: string;
+  pitchVideoDeadline: string;
+  totalFinalists: number;
+  evaluationCriteria: { id?: string; name: string; description?: string; weight: number }[];
+  questions: { id?: string; prompt: string; helpText?: string; type: QuestionType; options: string[]; required: boolean }[];
+  finalPitch?: { format?: string; venue?: string; meetingLink?: string; scheduledAt?: string } | null;
+  prizes: { rank: number; title: string; description?: string }[];
+}
+
+export interface StoredFile { id: string; fileName: string; contentType: string | null; size: number; uploadedAt: string | null }
+export interface IdeaSnapshot {
+  ideaName: string; oneLineDescription: string | null; stage: string | null; applicantName: string | null; applicantLocation: string | null;
+}
+export interface ScoreSheet {
+  stage: "SHORTLISTING" | "PITCH_VIDEO" | "FINAL";
+  scorerId: string;
+  scorerName: string | null;
+  scores: Record<string, number>;
+  total: number;
+  note: string | null;
+  updateTime: string | null;
+}
+
+export interface CompetitionApplication {
+  id: string;
+  competitionId: string;
+  ownerId: string;
+  ideaId: string;
+  idea: IdeaSnapshot;
+  potentialStatement: string | null;
+  expectedImpact: string | null;
+  supportNeeded: string | null;
+  answers: { questionId: string; text: string | null; choices: string[] }[];
+  pitchDeck: StoredFile | null;
+  pitchVideo: { link: string | null; file: StoredFile | null; submittedAt: string | null; filePurged: boolean } | null;
+  state: ApplicationState;
+  stateTime: string | null;
+  pendingDecision: "ADVANCE" | "REJECT" | null;
+  decisionNote: string | null;
+  winnerRank: number | null;
+  scoreSheets: ScoreSheet[];
+  shortlistingScore: number | null;
+  pitchVideoScore: number | null;
+  finalScore: number | null;
+  submitTime: string | null;
+  createTime: string;
+  updateTime: string;
+}
+
+export interface CompetitionEntrant { applicationId: string; ideaId: string; idea: IdeaSnapshot; state: ApplicationState; winnerRank: number | null }
+export interface CompetitionEntrants { shortlisted: CompetitionEntrant[]; finalists: CompetitionEntrant[]; winners: CompetitionEntrant[] }
+export interface CompetitionEvent { id: string; applicationId: string | null; actorId: string; action: string; detail: string | null; createTime: string }

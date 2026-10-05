@@ -1,7 +1,8 @@
 import { api } from "@/lib/api/http";
 import type {
-  AuditLog, BatchJob, Business, CategoryAnalysis, CursorPage, Entrepreneur, Folder, Idea, Journey, ManagedUser,
-  OffsetPage, Opportunity, Permission, Resource, Venture,
+  AuditLog, BatchJob, Business, CategoryAnalysis, Competition, CompetitionApplication, CompetitionEntrants, CompetitionEvent,
+  CompetitionInput, CursorPage, Entrepreneur, Folder, Idea, Journey, ManagedUser, OffsetPage, Opportunity, Permission,
+  Resource, Venture,
 } from "@/lib/api/types";
 
 /** Shared cursor-list query params. */
@@ -24,6 +25,45 @@ export const ideasApi = {
   material: (url: string) => api.blob(url, { timeoutMs: 120_000 }),
   /** Deletes in the background: resolves at once with the queued job (see batchJobsApi). */
   batchDelete: (ids: string[]) => api.post<BatchJob>("/api/v1/big-ideas/batch", { ids, action: "delete" }),
+};
+
+// ─── Competitions ───────────────────────────────────────────────────────────
+interface OffsetTokenPage<T> { items: T[]; nextPageToken: string | null; totalCount: number }
+
+/** Competition listings page with an opaque token; reshaped to the cursor-page form the list hooks use. */
+function toCursorPage<T>(page: OffsetTokenPage<T>, pageSize: number): CursorPage<T> {
+  return {
+    items: page.items, pageSize, returnedCount: page.items.length, totalCount: page.totalCount,
+    hasNextPage: !!page.nextPageToken, nextPageToken: page.nextPageToken,
+    hasPreviousPage: false, previousPageToken: null,
+  };
+}
+
+export const competitionsApi = {
+  list: async (q: CursorQuery & { state?: string[]; search?: string }) =>
+    toCursorPage(await api.get<OffsetTokenPage<Competition>>("/api/v1/competitions", { query: q as Q }), q.pageSize ?? 20),
+  get: (id: string) => api.get<Competition>(`/api/v1/competitions/${id}`),
+  create: (body: CompetitionInput) => api.post<Competition>("/api/v1/competitions", body),
+  update: (id: string, body: CompetitionInput) => api.put<Competition>(`/api/v1/competitions/${id}`, body),
+  remove: (id: string) => api.delete(`/api/v1/competitions/${id}`),
+  publish: (id: string) => api.post<Competition>(`/api/v1/competitions/${id}/publish`),
+  startShortlisting: (id: string) => api.post<Competition>(`/api/v1/competitions/${id}/start-shortlisting`),
+  announceShortlist: (id: string) => api.post<Competition>(`/api/v1/competitions/${id}/announce-shortlist`),
+  announceFinalists: (id: string) => api.post<Competition>(`/api/v1/competitions/${id}/announce-finalists`),
+  declareWinners: (id: string, applicationIds: string[]) => api.post<Competition>(`/api/v1/competitions/${id}/winners`, { applicationIds }),
+  cancel: (id: string, reason: string) => api.post<Competition>(`/api/v1/competitions/${id}/cancel`, { reason }),
+  entrants: (id: string) => api.get<CompetitionEntrants>(`/api/v1/competitions/${id}/entrants`),
+  events: async (id: string, q: CursorQuery & { applicationId?: string }) =>
+    toCursorPage(await api.get<OffsetTokenPage<CompetitionEvent>>(`/api/v1/competitions/${id}/events`, { query: q as Q }), q.pageSize ?? 50),
+  applications: async (id: string, q: CursorQuery & { state?: string[]; search?: string; order?: "score" }) =>
+    toCursorPage(await api.get<OffsetTokenPage<CompetitionApplication>>(`/api/v1/competitions/${id}/applications`, { query: q as Q }), q.pageSize ?? 50),
+  application: (applicationId: string) => api.get<CompetitionApplication>(`/api/v1/competitions/applications/${applicationId}`),
+  score: (applicationId: string, scores: { criterionId: string; score: number }[], note?: string) =>
+    api.post<CompetitionApplication>(`/api/v1/competitions/applications/${applicationId}/score`, { scores, note }),
+  decide: (applicationId: string, decision: "ADVANCE" | "REJECT" | "NONE", note?: string) =>
+    api.post<CompetitionApplication>(`/api/v1/competitions/applications/${applicationId}/decision`, { decision, note }),
+  file: (applicationId: string, fileId: string) =>
+    api.blob(`/api/v1/competitions/applications/${applicationId}/files/${fileId}?inline=true`, { timeoutMs: 600_000 }),
 };
 
 // ─── Opportunities ──────────────────────────────────────────────────────────
