@@ -1,5 +1,5 @@
 import {
-  Building2, ClipboardList, FolderOpen, HandCoins, LayoutDashboard, Lightbulb, ShieldCheck, Trophy, UserRound, Users,
+  Building2, ClipboardList, FolderOpen, HandCoins, HandHeart, LayoutDashboard, Lightbulb, ShieldCheck, Trophy, UserRound, Users,
   type LucideIcon,
 } from "lucide-react";
 import type { Area } from "@/lib/auth/permissions";
@@ -25,6 +25,7 @@ export const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/big-ideas", label: "Big Ideas", icon: Lightbulb, area: "bigIdeas", badge: "ideas", keywords: "pitches submissions review" },
       { href: "/competitions", label: "Competitions", icon: Trophy, area: "bigIdeas", keywords: "next big idea shortlist finalists winners pitch" },
+      { href: "/donations", label: "Donations", icon: HandHeart, area: "bigIdeas", keywords: "next big idea fund donors payments monime money" },
       { href: "/opportunities", label: "Opportunities", icon: HandCoins, area: "opportunities", badge: "opportunities", keywords: "grants events funding" },
       { href: "/businesses", label: "Businesses", icon: Building2, area: "businesses", badge: "businesses", keywords: "registrations kyc" },
       { href: "/entrepreneurs", label: "Entrepreneurs", icon: Users, area: "entrepreneurs", badge: "entrepreneurs", keywords: "profiles vetting" },

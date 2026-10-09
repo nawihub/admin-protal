@@ -1,7 +1,7 @@
 import { api } from "@/lib/api/http";
 import type {
   AuditLog, BatchJob, Business, CategoryAnalysis, Competition, CompetitionApplication, CompetitionEntrants, CompetitionEvent,
-  CompetitionInput, CursorPage, Entrepreneur, Folder, Idea, Journey, ManagedUser, OffsetPage, Opportunity, Permission,
+  CompetitionInput, CursorPage, Donation, Entrepreneur, FundOverview, Folder, Idea, Journey, ManagedUser, OffsetPage, Opportunity, Permission,
   Resource, Venture,
 } from "@/lib/api/types";
 
@@ -25,6 +25,14 @@ export const ideasApi = {
   material: (url: string) => api.blob(url, { timeoutMs: 120_000 }),
   /** Deletes in the background: resolves at once with the queued job (see batchJobsApi). */
   batchDelete: (ids: string[]) => api.post<BatchJob>("/api/v1/big-ideas/batch", { ids, action: "delete" }),
+};
+
+// ─── Donations ──────────────────────────────────────────────────────────────
+export const donationsApi = {
+  list: (q: CursorQuery & { status?: string; method?: string; search?: string }) =>
+    api.get<CursorPage<Donation>>("/api/v1/donations", { query: q as Q }),
+  get: (id: string) => api.get<Donation>(`/api/v1/donations/${id}`),
+  overview: () => api.get<FundOverview>("/api/v1/donations/overview"),
 };
 
 // ─── Competitions ───────────────────────────────────────────────────────────

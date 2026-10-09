@@ -40,6 +40,9 @@ const STATUS_TONE: Record<string, Tone> = {
   NOT_ADVANCED: "neutral",
   WINNER: "success",
   WITHDRAWN: "neutral",
+  // Donations
+  FAILED: "error",
+  EXPIRED: "neutral",
 };
 
 // Labels that read better than the raw enum.

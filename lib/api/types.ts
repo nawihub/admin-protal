@@ -425,3 +425,35 @@ export interface CompetitionApplication {
 export interface CompetitionEntrant { applicationId: string; ideaId: string; idea: IdeaSnapshot; state: ApplicationState; winnerRank: number | null }
 export interface CompetitionEntrants { shortlisted: CompetitionEntrant[]; finalists: CompetitionEntrant[]; winners: CompetitionEntrant[] }
 export interface CompetitionEvent { id: string; applicationId: string | null; actorId: string; action: string; detail: string | null; createTime: string }
+
+// ─── Donations (Next Big Idea fund) ─────────────────────────────────────────
+export interface Money {
+  value: number;
+  currency: string;
+}
+
+export type DonationStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "EXPIRED";
+/** Mobile money settles in leones (a USSD code), card in US dollars (Monime checkout). */
+export type DonationMethod = "MOBILE_MONEY" | "CARD";
+
+export interface Donation {
+  id: string;
+  status: DonationStatus;
+  method: DonationMethod;
+  amount: Money;
+  /** Shown in full to admins; `anonymous` means the donor isn't named publicly. */
+  donor: { fullName: string; email: string | null; phone: string | null; anonymous: boolean };
+  paymentId: string | null;
+  ussdCode: string | null;
+  expiresAt: string | null;
+  failureReason: string | null;
+  createTime: string | null;
+  updateTime: string | null;
+}
+
+export interface FundOverview {
+  /** One total per currency (completed donations). */
+  raised: Money[];
+  completedDonations: number;
+  asOf: string;
+}
