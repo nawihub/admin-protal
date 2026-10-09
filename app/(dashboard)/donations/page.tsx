@@ -28,13 +28,14 @@ function MethodTag({ d }: { d: Donation }) {
   );
 }
 
-function DonorCell({ d }: { d: Donation }) {
+/** `className` sizes it: the table keeps a minimum width, a card lets it shrink. */
+function DonorCell({ d, className = "min-w-[14rem]" }: { d: Donation; className?: string }) {
   return (
-    <div className="flex min-w-[14rem] items-center gap-3">
+    <div className={`flex items-center gap-3 ${className}`}>
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold">{initialsOf(d.donor.fullName)}</span>
       <div className="min-w-0">
-        <p className="flex items-center gap-1.5 truncate font-medium">
-          {d.donor.fullName}
+        <p className="flex min-w-0 items-center gap-1.5 font-medium">
+          <span className="truncate">{d.donor.fullName}</span>
           {d.donor.anonymous && <EyeOff className="size-3.5 shrink-0 text-muted-foreground" aria-label="Anonymous publicly" />}
         </p>
         <p className="truncate text-xs text-muted-foreground">{d.donor.email ?? d.donor.phone ?? "No contact"}</p>
@@ -54,15 +55,15 @@ const COLUMNS: Column<Donation>[] = [
 function DonationCard({ d }: { d: Donation }) {
   return (
     <div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <DonorCell d={d} />
-        <StatusBadge status={d.status} />
+      <div className="flex items-center justify-between gap-2">
+        <span className="min-w-0 truncate font-mono text-lg font-semibold">{formatMoney(d.amount)}</span>
+        <StatusBadge status={d.status} className="shrink-0" />
       </div>
+      <DonorCell d={d} className="min-w-0" />
       <div className="mt-auto flex items-center justify-between gap-2">
-        <span className="font-mono text-lg font-semibold">{formatMoney(d.amount)}</span>
         <MethodTag d={d} />
+        <span className="text-xs text-muted-foreground">{timeAgo(d.createTime)}</span>
       </div>
-      <p className="text-xs text-muted-foreground">{timeAgo(d.createTime)}</p>
     </div>
   );
 }
